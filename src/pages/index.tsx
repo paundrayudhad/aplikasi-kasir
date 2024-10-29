@@ -1,115 +1,131 @@
-import Image from "next/image";
-import localFont from "next/font/local";
+'use client'
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
+import { useState, useEffect } from 'react'
+import { Plus, Minus, ShoppingCart } from 'lucide-react'
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 
-export default function Home() {
+interface Product {
+  id: number
+  name: string
+  price: number
+}
+
+interface CartItem extends Product {
+  quantity: number
+}
+
+const initialProducts: Product[] = [
+  { id: 1, name: "Nasi Goreng", price: 15000 },
+  { id: 2, name: "Mie Ayam", price: 12000 },
+  { id: 3, name: "Es Teh", price: 3000 },
+  { id: 4, name: "Sate Ayam", price: 20000 },
+]
+
+export default function KasirApp() {
+  const [products, setProducts] = useState<Product[]>([])
+  const [cart, setCart] = useState<CartItem[]>([])
+  const [isClient, setIsClient] = useState(false)
+
+  useEffect(() => {
+    setProducts(initialProducts)
+    setIsClient(true)
+  }, [])
+
+  const addToCart = (product: Product) => {
+    setCart(currentCart => {
+      const existingItem = currentCart.find(item => item.id === product.id)
+      if (existingItem) {
+        return currentCart.map(item =>
+          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+        )
+      }
+      return [...currentCart, { ...product, quantity: 1 }]
+    })
+  }
+
+  const removeFromCart = (productId: number) => {
+    setCart(currentCart => {
+      const existingItem = currentCart.find(item => item.id === productId)
+      if (existingItem && existingItem.quantity > 1) {
+        return currentCart.map(item =>
+          item.id === productId ? { ...item, quantity: item.quantity - 1 } : item
+        )
+      }
+      return currentCart.filter(item => item.id !== productId)
+    })
+  }
+
+  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
+
+  if (!isClient) {
+    return null // or a loading spinner
+  }
+
   return (
-    <div
-      className={`${geistSans.variable} ${geistMono.variable} grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]`}
-    >
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/pages/index.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Aplikasi Kasir</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Daftar Produk</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-2">
+              {products.map(product => (
+                <li key={product.id} className="flex justify-between items-center">
+                  <span>{product.name} - Rp {product.price.toLocaleString()}</span>
+                  <Button onClick={() => addToCart(product)}>
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Keranjang Belanja</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-2">
+              {cart.map(item => (
+                <li key={item.id} className="flex justify-between items-center">
+                  <span>{item.name} x {item.quantity}</span>
+                  <div className="flex items-center space-x-2">
+                    <span>Rp {(item.price * item.quantity).toLocaleString()}</span>
+                    <Button variant="outline" size="icon" onClick={() => removeFromCart(item.id)}>
+                      <Minus className="h-4 w-4" />
+                    </Button>
+                    <Button variant="outline" size="icon" onClick={() => addToCart(item)}>
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+          <CardFooter className="flex justify-between items-center">
+            <span className="font-bold">Total:</span>
+            <span className="font-bold text-lg">Rp {total.toLocaleString()}</span>
+          </CardFooter>
+        </Card>
+      </div>
+      <Card className="mt-4">
+        <CardHeader>
+          <CardTitle>Pembayaran</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex space-x-2">
+            <Input type="number" placeholder="Jumlah uang" className="flex-grow" />
+            <Button className="flex items-center space-x-2">
+              <ShoppingCart className="h-4 w-4" />
+              <span>Bayar</span>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
-  );
+  )
 }
